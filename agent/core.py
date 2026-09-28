@@ -42,12 +42,19 @@ class Agent:
         names = ", ".join(self.tools.keys())
         return REACT_SYSTEM_PROMPT.format(tool_descriptions=descriptions, tool_names=names)
 
-    def run(self, question: str, on_step=None) -> str:
-        messages = [
-            {"role": "system", "content": self._system_prompt()},
-            {"role": "user", "content": f"Question: {question}"},
-        ]
+    def run(self, question: str, on_step=None, history=None) -> str:
+        messages = [{"role": "system", "content": self._system_prompt()}]
 
+        # Earlier chat turns, so the agent remembers the conversation.
+        # Only the last 10 messages are kept to limit token usage.
+        for turn in (history or [])[-10:]:
+            if turn["role"] == "user":
+                messages.append({"role": "user", "content": f"Question: {turn['content']}"})
+            else:
+                messages.append({"role": "assistant", "content": f"Final Answer: {turn['content']}"})
+
+        messages.append({"role": "user", "content": f"Question: {question}"})
+################################################################################
         for step in range(self.max_steps):
             reply = self.llm.chat(messages)
             if self.verbose:

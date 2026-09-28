@@ -65,7 +65,11 @@ if prompt := st.chat_input("Ask me anything..."):
             status.write(f"🛠️ Using **{tool}** ← `{tool_input}`")
 
         try:
-            answer = agent.run(prompt, on_step=on_step)
+            answer = agent.run(
+                prompt,
+                on_step=on_step,
+                history=st.session_state.messages[:-1],
+            )
             status.update(label="Done", state="complete", expanded=False)
         except Exception as e:
             answer = f"Something went wrong: `{e}`"
