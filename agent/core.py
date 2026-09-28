@@ -42,7 +42,7 @@ class Agent:
         names = ", ".join(self.tools.keys())
         return REACT_SYSTEM_PROMPT.format(tool_descriptions=descriptions, tool_names=names)
 
-    def run(self, question: str) -> str:
+    def run(self, question: str, on_step=None) -> str:
         messages = [
             {"role": "system", "content": self._system_prompt()},
             {"role": "user", "content": f"Question: {question}"},
@@ -82,6 +82,11 @@ class Agent:
 
             if self.verbose:
                 print(f"Observation: {observation}")
+            if self.verbose:
+                print(f"Observation: {observation}")
+
+            if on_step:
+                on_step(tool_name, tool_input, observation)
 
             messages.append({"role": "assistant", "content": reply})
             messages.append({"role": "user", "content": f"Observation: {observation}"})
